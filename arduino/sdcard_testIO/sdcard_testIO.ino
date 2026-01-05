@@ -8,10 +8,20 @@
   pin connections:
   3v -> 3v
   GND -> GND
-  CLK -> D18
+  CLK -> D18 !!!!!!!!!!!!!!!!
   (MI)SO -> D19
   (MO)SI -> D23
   CS -> D5
+
+  pcm1808
+  5v -> vin
+  3.3 -> 3.3
+  GND -> GND
+  md0, md1, fmy -> GND
+  bck -> D15
+  out -> TX2
+  LRC -> RX2
+  SCK -> D18 (same as sd card clk)
 */
 
 #include "FS.h"
