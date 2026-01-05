@@ -53,9 +53,12 @@ void setup() {
   i2sStream.begin(cfg);
   csvOutput.begin(info);
 
+  //SDCARD
+  sd_setup();
 }
 
 void loop() {
+  sd_loop();
   copier.copy(); //copy audio to CSV stream
   if (digitalRead(btnPin)) {
     if (!stateChanged) {
