@@ -1,14 +1,18 @@
-void sd_setup(){
-  Serial.begin(115200);
+/// opens SD card connection and performs IO Test
+/// returns true if test successfull, otherwise false
+bool sd_setup(){
+  bool blnSuccess = false;
   if(!SD.begin(5)){
-    Serial.println("Card Mount Failed");
-    return;
+    //Serial.println("Card Mount Failed");
+    error_blink(0);
+    return blnSuccess;
   }
   uint8_t cardType = SD.cardType();
 
   if(cardType == CARD_NONE){
-    Serial.println("No SD card attached");
-    return;
+    //Serial.println("No SD card attached");
+    error_blink(1);
+    return blnSuccess;
   }
 
   Serial.print("SD Card Type: ");
@@ -23,22 +27,13 @@ void sd_setup(){
   }
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
-  listDir(SD, "/", 0);
-  createDir(SD, "/mydir");
-  listDir(SD, "/", 0);
-  removeDir(SD, "/mydir");
-  listDir(SD, "/", 2);
-  writeFile(SD, "/hello.txt", "Hello ");
-  appendFile(SD, "/hello.txt", "World!\n");
-  readFile(SD, "/hello.txt");
-  deleteFile(SD, "/foo.txt");
-  renameFile(SD, "/hello.txt", "/foo.txt");
-  readFile(SD, "/foo.txt");
+  writeFile(SD, "/test.txt", "Test File Working"); //create a test file if it does not exist
   testFileIO(SD, "/test.txt");
+  Serial.printf("SD Card Size: %lluMB\n", cardSize);
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+  return blnSuccess;
 }
 
 void sd_loop() {
@@ -60,16 +55,19 @@ void sd_loop() {
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 }
 
+
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
   Serial.printf("Listing directory: %s\n", dirname);
 
   File root = fs.open(dirname);
   if(!root){
-    Serial.println("Failed to open directory");
+    //Serial.println("Failed to open directory");
+    error_blink(2);
     return;
   }
   if(!root.isDirectory()){
-    Serial.println("Not a directory");
+    //Serial.println("Not a directory");
+    error_blink(3);
     return;
   }
 
@@ -96,7 +94,8 @@ void createDir(fs::FS &fs, const char * path){
   if(fs.mkdir(path)){
     Serial.println("Dir created");
   } else {
-    Serial.println("mkdir failed");
+    //Serial.println("mkdir failed");
+    error_blink(4);
   }
 }
 
@@ -105,7 +104,8 @@ void removeDir(fs::FS &fs, const char * path){
   if(fs.rmdir(path)){
     Serial.println("Dir removed");
   } else {
-    Serial.println("rmdir failed");
+    //Serial.println("rmdir failed");
+    error_blink(5);
   }
 }
 
@@ -114,7 +114,8 @@ void readFile(fs::FS &fs, const char * path){
 
   File file = fs.open(path);
   if(!file){
-    Serial.println("Failed to open file for reading");
+    //Serial.println("Failed to open file for reading");
+    error_blink(6);
     return;
   }
 
@@ -126,17 +127,19 @@ void readFile(fs::FS &fs, const char * path){
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
-  Serial.printf("Writing file: %s\n", path);
+  Serial.printf("Writing test file: %s\n", path);
 
   File file = fs.open(path, FILE_WRITE);
   if(!file){
-    Serial.println("Failed to open file for writing");
+    //Serial.println("Failed to open file for writing");
+    error_blink(7);
     return;
   }
   if(file.print(message)){
     Serial.println("File written");
   } else {
-    Serial.println("Write failed");
+    //Serial.println("Write failed");
+    error_blink(8);
   }
   file.close();
 }
@@ -146,13 +149,15 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
 
   File file = fs.open(path, FILE_APPEND);
   if(!file){
-    Serial.println("Failed to open file for appending");
+    //Serial.println("Failed to open file for appending");
+    error_blink(9);
     return;
   }
   if(file.print(message)){
       Serial.println("Message appended");
   } else {
-    Serial.println("Append failed");
+    //Serial.println("Append failed");
+    error_blink(10);
   }
   file.close();
 }
@@ -162,7 +167,8 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
   if (fs.rename(path1, path2)) {
     Serial.println("File renamed");
   } else {
-    Serial.println("Rename failed");
+    //Serial.println("Rename failed");
+    error_blink(11);
   }
 }
 
@@ -171,7 +177,8 @@ void deleteFile(fs::FS &fs, const char * path){
   if(fs.remove(path)){
     Serial.println("File deleted");
   } else {
-    Serial.println("Delete failed");
+    //Serial.println("Delete failed");
+    error_blink(12);
   }
 }
 
@@ -197,13 +204,15 @@ void testFileIO(fs::FS &fs, const char * path){
     Serial.printf("%u bytes read for %u ms\n", flen, end);
     file.close();
   } else {
-    Serial.println("Failed to open file for reading");
+    //Serial.println("Failed to open file for reading");
+    error_blink(6);
   }
 
 
   file = fs.open(path, FILE_WRITE);
   if(!file){
-    Serial.println("Failed to open file for writing");
+    //Serial.println("Failed to open file for writing");
+    error_blink(7);
     return;
   }
 
