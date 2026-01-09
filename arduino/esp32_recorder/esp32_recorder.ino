@@ -182,13 +182,14 @@ void readBtn() {
       btnPressMillis = millis();
 
       if (btnState && !lastBtnState) {
-        Serial.println("Press");
-        stateChanged = true;
+        //Serial.println("Press");
+        //stateChanged = true;
       }
 
-      // if (!btnState && lastBtnState) {
-      //   Serial.println("Release");
-      // }
+      if (!btnState && lastBtnState) {
+        Serial.println("Release");
+        stateChanged = true;
+      }
       lastBtnState = btnState;
     }
   }
