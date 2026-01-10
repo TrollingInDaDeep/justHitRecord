@@ -27,8 +27,8 @@ void appendFile(fs::FS &fs, const char * path, const char * message);
 void renameFile(fs::FS &fs, const char * path1, const char * path2);
 void deleteFile(fs::FS &fs, const char * path);
 void testFileIO(fs::FS &fs, const char * path);
-
-
+void createSessionDir(fs::FS &fs, const char * dirname, uint8_t levels);
+void setNextRecordingName(fs::FS &fs, const char* dirname, uint8_t levels);
 
 ///
 /// variables
@@ -64,19 +64,24 @@ int i2s_data = 17; //TX2 (Pin 17) Data (out)
 int i2s_mck = 3; //RX0 (Pin 3) MCLK (SCK)
 
 //SDCard Stuff
-const char *file_name = "/aufnahme_.raw";
+const char *file_prefix = "/aufnahme_"; //prefix of rec file
+const char *file_suffix = ".raw"; //suffix of rec file
+char nextRecFileName[64]; //full name of next file to be recorded
 File recFile; //Stream that will be saved to SD Card
-uint64_t end_time; //trigger to call endRecord
+int fileCount = 0; //how many files are created in current recording Session
 
-
+const char* dirPrefix = "/Session_"; //prefix of the directory name
+int dirCount = 0; //counts how many directories there are, to create next directory
+char nextDirName[20]; //name of the next directory to be created
 //functions
 
 /// starts SD card recording
 void record_start(){
   Serial.println("recording...");
+  setNextRecordingName(SD, nextDirName, 0);
 
   //open output file in Write mode
-  recFile = SD.open(file_name, FILE_WRITE);
+  recFile = SD.open(nextRecFileName, FILE_WRITE);
   audioStreamToFile.begin(recFile, i2sStream);
   blnRecording = true;
   digitalWrite(ledPin, blnRecording);
@@ -306,6 +311,8 @@ void setup() {
   error_blink(69); //show success message!!
   lastBtnState = digitalRead(recBtnPin);
   //startNetwork();
+
+  createSessionDir(SD, "/", 0); //count all directories to determine in which dir to save next
 }
 
 void loop() {

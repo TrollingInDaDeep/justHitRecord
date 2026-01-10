@@ -55,6 +55,69 @@ void sd_loop() {
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 }
 
+///creates directory for current session
+///session means one boot. at next reboot, new dir is created
+///called once at setup
+void createSessionDir(fs::FS &fs, const char* dirname, uint8_t levels){
+  File root = fs.open(dirname);
+  if(!root){
+    //Serial.println("Failed to open directory");
+    error_blink(2);
+    return;
+  }
+  if(!root.isDirectory()){
+    //Serial.println("Not a directory");
+    error_blink(3);
+    return;
+  }
+
+  File file = root.openNextFile();
+  while(file){
+    if(file.isDirectory()){
+      dirCount++;
+    }
+    file = root.openNextFile();
+  }
+  Serial.print("counted directories: ");
+  Serial.println(dirCount);
+  Serial.print("creating next directory: ");
+  dirCount++; //increment by one as I want to create next dir
+  snprintf(nextDirName, sizeof(nextDirName), "%s%d", dirPrefix, dirCount);
+  Serial.println(nextDirName);
+  if(fs.mkdir(nextDirName)){
+    Serial.println("Dir created");
+  } else {
+    //Serial.println("mkdir failed");
+    error_blink(4);
+  }
+  return;
+}
+
+void setNextRecordingName(fs::FS &fs, const char* dirname, uint8_t levels) {
+  File root = fs.open(dirname);
+  if(!root){
+    //Serial.println("Failed to open directory");
+    error_blink(2);
+    return;
+  }
+  if(!root.isDirectory()){
+    //Serial.println("Not a directory");
+    error_blink(3);
+    return;
+  }
+  fileCount=0; //reset before counting
+  File file = root.openNextFile();
+  while(file){ //loop through all files, increment counter
+    fileCount++;
+    file = root.openNextFile();
+  }
+
+  fileCount++; //increment by one as I want to create next file
+  //%s = char, %d = int
+  snprintf(nextRecFileName, sizeof(nextRecFileName), "%s%s%d%s", nextDirName, file_prefix, fileCount, file_suffix);
+  Serial.print("next file will be: ");
+  Serial.println(nextRecFileName);
+}
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
   Serial.printf("Listing directory: %s\n", dirname);
