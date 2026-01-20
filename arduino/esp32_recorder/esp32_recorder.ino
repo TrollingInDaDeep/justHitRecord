@@ -34,8 +34,8 @@ void setNextRecordingName(fs::FS &fs, const char* dirname, uint8_t levels);
 /// variables
 ///
 
-int ledPin = 13; //D2
-int recBtnPin = 12; //D4
+int ledPin = 12; //D2
+int recBtnPin = 13; //D4
 //bool isRecording = false; //if recording is armed
 bool blnRecording = false;
 bool stateChanged = false; //if the button state already changed
