@@ -6,7 +6,9 @@ Current plan:
 Jack socket -> PCM ADC -> ESP32 -> SD Breakout board -> SD Card
 Additionally, wire a button and an LED to the ESP for controlling.
 
-Future improvements
+
+
+# Future improvements
 Hardware
 * better fitting case
 * SD card doesn't necessarily need to be exposed
